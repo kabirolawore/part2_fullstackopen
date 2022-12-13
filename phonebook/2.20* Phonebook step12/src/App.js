@@ -12,6 +12,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [newSearch, setNewSearch] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [alert, setAlert] = useState(undefined);
 
   useEffect(() => {
     personService.getAll().then((intialPersons) => setPersons(intialPersons));
@@ -38,9 +40,20 @@ const App = () => {
               setPersons(
                 persons.map((n) => (n.id !== person.id ? n : returnedPerson))
               );
+              setAlert("success");
               setSuccessMessage(`number updated for ${person.name}`);
               setTimeout(() => {
                 setSuccessMessage(null);
+              }, 3000);
+            })
+            .catch((returnedError) => {
+              console.log(returnedError.message);
+              setAlert("error");
+              setErrorMessage(
+                `Information of ${person.name} has already been removed from the server`
+              );
+              setTimeout(() => {
+                setErrorMessage(null);
               }, 3000);
             });
         }
@@ -53,6 +66,7 @@ const App = () => {
     ) {
       personService.create(phonebookObject).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
+        setAlert("success");
         setSuccessMessage(`Added ${returnedPerson.name}`);
         setTimeout(() => {
           setSuccessMessage(null);
@@ -97,7 +111,10 @@ const App = () => {
 
   return (
     <div>
-      <Notification message={successMessage} />
+      {alert === "success" && (
+        <Notification message={successMessage} success="success" />
+      )}
+      {alert === "error" && <Notification message={errorMessage} success="" />}
       <h2>Phonebook</h2>
       <Filter
         handleValue={newSearch}
